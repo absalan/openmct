@@ -35,9 +35,10 @@
     </div>
 
     <div class='abs frame t-frame-outer child-frame panel s-selectable s-moveable s-hover-border'
-         ng-class="{ 'no-frame': !controller.hasFrame(childObject), 's-selected':controller.selected(childObject) }"
+         ng-class="{ 'no-frame': !controller.hasFrame(childObject), 's-selected':controller.selected(childObject) && !controller.drillable(childObject) }"
          ng-repeat="childObject in composition"
          ng-click="controller.select($event, childObject.getId(), childObject)"
+         ng-dblclick="controller.drill($event, childObject)"
          ng-style="controller.getFrameStyle(childObject.getId())">
 
         <mct-representation key="'frame'"
@@ -45,7 +46,7 @@
                             mct-object="childObject">
         </mct-representation>
         <!-- Drag handles -->
-        <span class="abs t-edit-handle-holder" ng-if="controller.selected(childObject)">
+        <span class="abs t-edit-handle-holder" ng-if="controller.selected(childObject) && !controller.drillable(childObject)">
             <span class="edit-handle edit-move"
                   mct-drag-down="controller.startDrag(childObject.getId(), [1,1], [0,0])"
                   mct-drag="controller.continueDrag(delta)"
@@ -73,7 +74,6 @@
                   mct-drag-up="controller.endDrag()">
             </span>
         </span>
-
     </div>
 
 </div>

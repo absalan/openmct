@@ -170,6 +170,7 @@ define(
             this.rawPositions = {};
             this.gridSize = DEFAULT_GRID_SIZE;
             this.$scope = $scope;
+            this.drillInto = {};
 
             // Watch for changes to the grid size in the model
             $scope.$watch("model.layoutGrid", updateGridSize);
@@ -379,9 +380,13 @@ define(
         LayoutController.prototype.select = function (event, id, domainObject) {
             if (event) {
                 event.stopPropagation();
+                // if (this.selected(domainObject)) {
+                //     return;
+                // }
             }
 
             this.selectedId = id;
+            this.drillInto[domainObject] = false;
             var selectedObj = {};
             selectedObj[this.frames[id] ? 'hideFrame' : 'showFrame'] =
                 this.toggleFrame.bind(this, id, domainObject);
@@ -414,20 +419,35 @@ define(
          * Clear the current user selection.
          */
         LayoutController.prototype.clearSelection = function (event) {
-            if (event) {
-                event.stopPropagation();
-            }
-
+            // if (event) {
+            //     event.stopPropagation();
+            // }   
+             
             if (this.dragInProgress) {
                 return;
             }
 
+            this.drillInto = {};
             delete this.selectedId;
 
             this.openmct.selection.select({
                 item: this.$scope.domainObject.useCapability('adapter'),
                 oldItem: this.$scope.domainObject
             });
+        };
+
+        LayoutController.prototype.drillable = function (childObject) {
+            return this.drillInto[childObject];
+        };
+
+        LayoutController.prototype.drill = function (event, domainObject) {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            if (this.selected(domainObject)) {
+                this.drillInto[domainObject] = true;
+            }
         };
 
         /**
