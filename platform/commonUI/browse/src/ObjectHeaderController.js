@@ -42,25 +42,6 @@ define(
          * @param event the mouse event
          */
         ObjectHeaderController.prototype.updateName = function (event) {
-<<<<<<< HEAD
-            if (event && (event.type === 'blur' || event.which === 13)) {
-                var name = event.currentTarget.innerHTML;
-
-                if (name.length === 0) {
-                    name = "Unnamed " + this.domainObject.getCapability("type").typeDef.name;
-                    event.currentTarget.innerHTML = name;
-                }
-
-                if (name !== this.$scope.domainObject.model.name) {
-                    this.domainObject.getCapability('mutation').mutate(function (model) {
-                        model.name = name;
-                    });
-                }
-
-                if (event.which === 13) {
-                    event.currentTarget.blur();
-                }
-=======
             if (!event || !event.currentTarget) {
                 return;
             }
@@ -92,7 +73,6 @@ define(
                 this.domainObject.getCapability('mutation').mutate(function (model) {
                     model.name = name;
                 });
->>>>>>> bda30f1475c51475b84a1a8bdb481cf2e82258f6
             }
         };
 
