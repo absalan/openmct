@@ -20,26 +20,41 @@
  * at runtime from the About dialog for additional information.
  *****************************************************************************/
 
-define([], function () {
-    function Region(element) {
-        this.activeView = undefined;
-        this.element = element;
+define([
+    'lodash'
+], function (
+    _
+) {
+
+    function patchViewCapability(viewConstructor) {
+        return function makeCapability(domainObject) {
+            var capability = viewConstructor(domainObject);
+            var oldInvoke = capability.invoke.bind(capability);
+
+            capability.invoke = function () {
+                var availableViews = oldInvoke();
+                var newDomainObject = capability
+                    .domainObject
+                    .useCapability('adapter');
+
+                return _(availableViews).map(function (v, i) {
+                    var vd = {
+                        view: v,
+                        priority: i + 100 // arbitrary to allow new views to
+                        // be defaults by returning priority less than 100.
+                    };
+                    if (v.provider && v.provider.priority) {
+                        vd.priority = v.provider.priority(newDomainObject);
+                    }
+                    return vd;
+                })
+                .sortBy('priority')
+                .map('view')
+                .value();
+            };
+            return capability;
+        };
     }
 
-    Region.prototype.clear = function () {
-        if (this.activeView) {
-            this.activeView.destroy();
-            this.activeView = undefined;
-        }
-    };
-
-    Region.prototype.show = function (view) {
-        this.clear();
-        this.activeView = view;
-        if (this.activeView) {
-            this.activeView.show(this.element);
-        }
-    };
-
-    return Region;
+    return patchViewCapability;
 });

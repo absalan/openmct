@@ -42,6 +42,7 @@ define(
          * @param event the mouse event
          */
         ObjectHeaderController.prototype.updateName = function (event) {
+<<<<<<< HEAD
             if (event && (event.type === 'blur' || event.which === 13)) {
                 var name = event.currentTarget.innerHTML;
 
@@ -59,6 +60,39 @@ define(
                 if (event.which === 13) {
                     event.currentTarget.blur();
                 }
+=======
+            if (!event || !event.currentTarget) {
+                return;
+            }
+
+            if (event.type === 'blur') {
+                this.updateModel(event);
+            } else if (event.which === 13) {
+                this.updateModel(event);
+                event.currentTarget.blur();
+                window.getSelection().removeAllRanges();
+            }
+        };
+
+        /**
+         * Updates the model.
+         *
+         * @param event the mouse event
+         * @param private
+         */
+        ObjectHeaderController.prototype.updateModel = function (event) {
+            var name = event.currentTarget.textContent.replace(/\n/g, ' ');
+
+            if (name.length === 0) {
+                name = "Unnamed " + this.domainObject.getCapability("type").typeDef.name;
+                event.currentTarget.textContent = name;
+            }
+
+            if (name !== this.domainObject.getModel().name) {
+                this.domainObject.getCapability('mutation').mutate(function (model) {
+                    model.name = name;
+                });
+>>>>>>> bda30f1475c51475b84a1a8bdb481cf2e82258f6
             }
         };
 

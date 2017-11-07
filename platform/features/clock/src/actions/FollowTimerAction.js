@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2009-2016, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -20,21 +20,37 @@
  * at runtime from the About dialog for additional information.
  *****************************************************************************/
 
-define([], function () {
-    function AdaptedViewController($scope, openmct) {
-        function refresh(legacyObject) {
-            if (!legacyObject) {
-                $scope.view = undefined;
-                return;
-            }
+define(
+    [],
+    function () {
 
-            var domainObject = legacyObject.useCapability('adapter');
-            var providers = openmct.mainViews.get(domainObject);
-            $scope.view = providers[0] && providers[0].view(domainObject);
+        /**
+         * Designates a specific timer for following. Timelines, for example,
+         * use the actively followed timer to display a time-of-interest line
+         * and interpret time conductor bounds in the Timeline's relative
+         * time frame.
+         *
+         * @implements {Action}
+         * @memberof platform/features/clock
+         * @constructor
+         * @param {ActionContext} context the context for this action
+         */
+        function FollowTimerAction(timerService, context) {
+            var domainObject =
+                context.domainObject &&
+                context.domainObject.useCapability('adapter');
+            this.perform =
+                timerService.setTimer.bind(timerService, domainObject);
         }
 
-        $scope.$watch('domainObject', refresh);
-    }
+        FollowTimerAction.appliesTo = function (context) {
+            var model =
+                (context.domainObject && context.domainObject.getModel()) ||
+                {};
 
-    return AdaptedViewController;
-});
+            return model.type === 'timer';
+        };
+
+        return FollowTimerAction;
+    }
+);
