@@ -419,10 +419,10 @@ define(
          * Clear the current user selection.
          */
         LayoutController.prototype.clearSelection = function (event) {
-            // if (event) {
-            //     event.stopPropagation();
-            // }   
-             
+            if (event) {
+                event.stopPropagation();
+            }
+
             if (this.dragInProgress) {
                 return;
             }
