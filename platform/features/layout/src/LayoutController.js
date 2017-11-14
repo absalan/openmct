@@ -140,8 +140,7 @@ define(
                             });
                             delete self.droppedIdToSelectAfterRefresh;
                         } else if (self.selectedId && composition.indexOf(self.selectedId) === -1) {
-                            // TODO: make sure toolbar updates if the selectedId is not in the composition.
-                            // self.clearSelection();
+                            openmct.selection.clear();
                         }
                     }
                 });
@@ -175,19 +174,20 @@ define(
 
             function setSelection(selectable) {
                 var selection = selectable[0];
+
                 if (!selection) {
+                    delete self.selectedId;
                     return;
                 }
-
-                var id = selection.context.oldItem.getId();
 
                 if (self.selectedId && self.drilledIn[self.selectedId]) {
                     self.selectable[0].element.classList.remove('s-drilled-in');
                 }
 
-                self.selectable = selectable;    
+                var id = selection.context.oldItem.getId();
                 self.selectedId = id;
                 self.drilledIn[id] = false;
+                self.selectable = selectable;
             }
 
             this.positions = {};
@@ -411,12 +411,16 @@ define(
             }
 
             this.frames[id] = configuration.panels[id].hasFrame = !this.frames[id];
-            // this.select(id, domainObject); // reselect so toolbar updates            
+
             var selection = this.openmct.selection.get();
-            this.openmct.selection.clear();
-            this.$scope.$digest();
-            this.openmct.selection.select(selection);
-            this.$scope.$digest();            
+            selection[0].context.toolbar = this.getToolbar(id, domainObject);
+            this.openmct.selection.select(selection);  // reselect so toolbar updates
+        };
+
+        LayoutController.prototype.getToolbar = function (id, domainObject) {
+            var selectedObj = {};
+            selectedObj[this.frames[id] ? 'hideFrame' : 'showFrame'] = this.toggleFrame.bind(this, id, domainObject);
+            return selectedObj;
         };
 
         /**
@@ -489,15 +493,10 @@ define(
          * item, oldItem and toolbar
          */
         LayoutController.prototype.getContext = function (domainObject) {
-            var id = domainObject.getId();
-            var selectedObj = {};
-            selectedObj[this.frames[id] ? 'hideFrame' : 'showFrame'] =
-                this.toggleFrame.bind(this, id, domainObject);
-
             return {
                 item: domainObject.useCapability('adapter'),
                 oldItem: domainObject,
-                toolbar: selectedObj
+                toolbar: this.getToolbar(domainObject.getId(), domainObject)
             }
         };
 
