@@ -68,11 +68,11 @@ define(
         }
 
         ElementsController.prototype.refreshComposition = function () {
-            var selection = this.scope.selection[0];
-            if (!selection) {
+            if (!this.scope.selection[0]) {
                 return;
             }
 
+            var selection = this.scope.selection[0].context;
             var comp = selection.oldItem.useCapability('composition');
             if (comp) {
                 comp.then(function (composition) {
