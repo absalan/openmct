@@ -209,8 +209,12 @@ define([
         this.Dialog = api.Dialog;
 
         this.on('navigation', function(domainObject) {
-            // This should be handled another way
-            // this.selection.select({item: domainObject.useCapability('adapter'), oldItem: domainObject});
+            this.selection.select({
+                context: {
+                    item: domainObject.useCapability('adapter'),
+                    oldItem: domainObject
+                }
+            });
         }.bind(this));
     }
 

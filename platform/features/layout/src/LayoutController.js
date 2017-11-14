@@ -175,6 +175,10 @@ define(
 
             function setSelection(selectable) {
                 var selection = selectable[0];
+                if (!selection) {
+                    return;
+                }
+
                 var id = selection.context.oldItem.getId();
 
                 if (self.selectedId && self.drilledIn[self.selectedId]) {

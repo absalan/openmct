@@ -70,7 +70,7 @@ define(['EventEmitter'], function (EventEmitter) {
             selectable = [selectable];
         }
 
-        if (this.selected[0]) {
+        if (this.selected[0] && this.selected[0].element) {
             this.selected[0].element.classList.remove('s-selected');
         } 
 
@@ -78,7 +78,9 @@ define(['EventEmitter'], function (EventEmitter) {
            this.selected[1].element.classList.remove('s-selected-parent');
         }
 
-        selectable[0].element.classList.add('s-selected');
+        if (selectable[0] && selectable[0].element) {
+            selectable[0].element.classList.add('s-selected');
+        }
 
         if (selectable[1]) {
             selectable[1].element.classList.add('s-selected-parent');
