@@ -113,14 +113,14 @@ define(
 
                 $scope.domainObject.useCapability('composition').then(function (composition) {
                     var ids;
-                    var domainObject;
+                    var objectToSelect;
 
                     //Is this callback for the most recent composition
                     // request? If not, discard it. Prevents race condition
                     if (thisCount === callbackCount) {
                         ids = composition.map(function (object) {
                                 if (self.droppedIdToSelectAfterRefresh && self.droppedIdToSelectAfterRefresh === object.getId()) {
-                                    domainObject = object;
+                                    objectToSelect = object;
                                 }
                                 return object.getId();
                             }) || [];
@@ -131,12 +131,11 @@ define(
 
                         // If there is a newly-dropped object, select it.
                         if (self.droppedIdToSelectAfterRefresh) {
-
                             // TODO: Need to pass in the 'element' as well.
                             // Or find the element and call the handler on it.
                             // element.onclick.apply(element)?
                             this.openmct.selection.select({
-                                context: this.getContext(domainObject)       
+                                context: self.getContext(objectToSelect)
                             });
                             delete self.droppedIdToSelectAfterRefresh;
                         } else if (self.selectedId && composition.indexOf(self.selectedId) === -1) {
@@ -459,6 +458,14 @@ define(
             }
 
             if (!domainObject.getCapability('editor').inEditContext()) {
+                return;
+            }
+
+            if (!domainObject.hasCapability('composition')) {
+                return;
+            }
+
+            if (domainObject.getModel().type === 'telemetry.fixed') {
                 return;
             }
 
