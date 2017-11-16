@@ -27,9 +27,11 @@
  */
 define(
     [
+        'zepto',
         './LayoutDrag'
     ],
     function (
+        $,
         LayoutDrag
     ) {
 
@@ -131,13 +133,7 @@ define(
 
                         // If there is a newly-dropped object, select it.
                         if (self.droppedIdToSelectAfterRefresh) {
-                            // TODO: Need to pass in the 'element' as well.
-                            // Or find the element and call the handler on it.
-                            // element.onclick.apply(element)?
-                            this.openmct.selection.select({
-                                context: self.getContext(objectToSelect)
-                            });
-                            delete self.droppedIdToSelectAfterRefresh;
+                            self.selectNewObject(objectToSelect);
                         } else if (self.selectedId && composition.indexOf(self.selectedId) === -1) {
                             openmct.selection.clear();
                         }
@@ -505,6 +501,21 @@ define(
                 oldItem: domainObject,
                 toolbar: this.getToolbar(domainObject.getId(), domainObject)
             }
+        };
+
+        LayoutController.prototype.getElementSelectorIfNew = function ($id, domainObject) {
+            if (domainObject.getId() === this.droppedIdToSelectAfterRefresh) {
+                this.newElementSelector = $(domainObject.getId() + '-' + $id).selector;
+            }
+        };
+
+        LayoutController.prototype.selectNewObject = function (domainObject) {
+            setTimeout(function () {
+                var newElementToSelect = $('.' + this.newElementSelector)[0];
+                newElementToSelect.click();
+                delete this.droppedIdToSelectAfterRefresh;
+                delete this.newElementSelector;
+            }.bind(this), 0);
         };
 
         return LayoutController;

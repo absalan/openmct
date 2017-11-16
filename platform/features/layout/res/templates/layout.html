@@ -34,9 +34,10 @@
              ng-style="{ 'background-size': '100% ' + controller.getGridSize() [1] + 'px' }"></div>
     </div>
 
-    <div class='abs frame t-frame-outer child-frame panel s-selectable s-moveable s-hover-border'
+    <div class="abs frame t-frame-outer child-frame panel s-selectable s-moveable s-hover-border {{childObject.getId() + '-' + $id}}"
          ng-class="{ 'no-frame': !controller.hasFrame(childObject) }"
          ng-repeat="childObject in composition"
+         ng-init="controller.getElementSelectorIfNew($id, childObject)"
          mct-selectable="controller.getContext(childObject)"
          ng-dblclick="controller.drill($event, childObject)"
          ng-style="controller.getFrameStyle(childObject.getId())">
