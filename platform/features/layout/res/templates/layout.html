@@ -37,8 +37,8 @@
     <div class="abs frame t-frame-outer child-frame panel s-selectable s-moveable s-hover-border {{childObject.getId() + '-' + $id}}"
          ng-class="{ 'no-frame': !controller.hasFrame(childObject) }"
          ng-repeat="childObject in composition"
-         ng-init="controller.getElementSelectorIfNew($id, childObject)"
-         mct-selectable="controller.getContext(childObject)"
+         ng-init="controller.selectIfNew($id, childObject)"
+         mct-selectable="controller.getContext(childObject, true)"
          ng-dblclick="controller.drill($event, childObject)"
          ng-style="controller.getFrameStyle(childObject.getId())">
 

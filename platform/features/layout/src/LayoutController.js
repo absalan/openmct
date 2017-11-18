@@ -55,8 +55,12 @@ define(
         function LayoutController($scope, openmct) {
             var self = this,
                 callbackCount = 0;
-
-            this.openmct = openmct;
+            
+            if ($scope.domainObject.getCapability('editor').isEditContextRoot()) {
+                openmct.selection.select({
+                    context: self.getContext($scope.domainObject)
+                });
+            }
 
             // Update grid size when it changed
             function updateGridSize(layoutGrid) {
@@ -115,15 +119,11 @@ define(
 
                 $scope.domainObject.useCapability('composition').then(function (composition) {
                     var ids;
-                    var objectToSelect;
 
                     //Is this callback for the most recent composition
                     // request? If not, discard it. Prevents race condition
                     if (thisCount === callbackCount) {
                         ids = composition.map(function (object) {
-                                if (self.droppedIdToSelectAfterRefresh && self.droppedIdToSelectAfterRefresh === object.getId()) {
-                                    objectToSelect = object;
-                                }
                                 return object.getId();
                             }) || [];
 
@@ -131,10 +131,7 @@ define(
                         self.layoutPanels(ids);
                         self.setFrames(ids);
 
-                        // If there is a newly-dropped object, select it.
-                        if (self.droppedIdToSelectAfterRefresh) {
-                            self.selectNewObject(objectToSelect);
-                        } else if (self.selectedId && composition.indexOf(self.selectedId) === -1) {
+                       if (self.selectedId && composition.indexOf(self.selectedId) === -1) {
                             openmct.selection.clear();
                         }
                     }
@@ -190,6 +187,7 @@ define(
             this.gridSize = DEFAULT_GRID_SIZE;
             this.$scope = $scope;
             this.drilledIn = {};
+            this.openmct = openmct;
 
             // Watch for changes to the grid size in the model
             $scope.$watch("model.layoutGrid", updateGridSize);
@@ -461,6 +459,7 @@ define(
                 return;
             }
 
+            // Disable since fixed position doesn't use the selection API yet
             if (domainObject.getModel().type === 'telemetry.fixed') {
                 return;
             }
@@ -495,27 +494,26 @@ define(
          * @return {object} the context object which includes
          * item, oldItem and toolbar
          */
-        LayoutController.prototype.getContext = function (domainObject) {
+        LayoutController.prototype.getContext = function (domainObject, toolbar) {
             return {
                 item: domainObject.useCapability('adapter'),
                 oldItem: domainObject,
-                toolbar: this.getToolbar(domainObject.getId(), domainObject)
+                toolbar: (toolbar) ? this.getToolbar(domainObject.getId(), domainObject) : undefined
             }
         };
 
-        LayoutController.prototype.getElementSelectorIfNew = function ($id, domainObject) {
+        /**
+         * Selects a newly-dropped object.
+         *
+         */
+        LayoutController.prototype.selectIfNew = function ($id, domainObject) {
             if (domainObject.getId() === this.droppedIdToSelectAfterRefresh) {
-                this.newElementSelector = $(domainObject.getId() + '-' + $id).selector;
+                var selector = $(domainObject.getId() + '-' + $id).selector;
+                setTimeout(function () {
+                    $('.' + selector)[0].click();
+                    delete this.droppedIdToSelectAfterRefresh;
+                }.bind(this), 0);
             }
-        };
-
-        LayoutController.prototype.selectNewObject = function (domainObject) {
-            setTimeout(function () {
-                var newElementToSelect = $('.' + this.newElementSelector)[0];
-                newElementToSelect.click();
-                delete this.droppedIdToSelectAfterRefresh;
-                delete this.newElementSelector;
-            }.bind(this), 0);
         };
 
         return LayoutController;
